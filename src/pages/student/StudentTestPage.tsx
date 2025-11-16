@@ -1,4 +1,3 @@
-
 /** @jsxImportSource @emotion/react */
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
@@ -43,11 +42,25 @@ const OptionLabel = styled.label`
   }
 `;
 
+const TextAnswerWrapper = styled.div`
+  margin-top: 8px;
+`;
+
+const TextInput = styled.textarea`
+  width: 100%;
+  min-height: 80px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+  font-family: inherit;
+`;
+
 type Question = {
   id: number | string;
   testId: number;
   text: string;
-  type: "single" | "multiple";
+  type: "single" | "multiple" | "text";
   options?: string[];
 };
 
@@ -58,6 +71,7 @@ export default function StudentTestPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [textAnswers, setTextAnswers] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetch("/data/questions.json")
@@ -79,9 +93,12 @@ export default function StudentTestPage() {
   if (loading) return <p>Загрузка…</p>;
   if (error) return <p style={{ color: "red" }}>Ошибка: {error}</p>;
 
-  // Фильтрация вопросов по testId
   const filtered = questions.filter((q) => q.testId === testId);
   if (filtered.length === 0) return <p>Вопросы не найдены</p>;
+
+  const handleTextChange = (id: number | string, value: string) => {
+    setTextAnswers((prev) => ({ ...prev, [id]: value }));
+  };
 
   return (
     <div>
@@ -112,9 +129,8 @@ export default function StudentTestPage() {
                 {(q.options ?? []).map((opt, idx) => (
                   <li key={idx}>
                     <OptionLabel>
-                      <input
-                        type="radio"
-                        name={`q-${q.id}`} // группировка радиокнопок
+                      <input                    type="radio"
+                        name={`q-${q.id}`} 
                         aria-label={`Вопрос ${q.id}: вариант ${idx + 1}`}
                       />
                       <span>{opt}</span>
@@ -123,9 +139,22 @@ export default function StudentTestPage() {
                 ))}
               </OptionsList>
             )}
+
+            {q.type === "text" && (
+              <TextAnswerWrapper>
+                <TextInput
+                  value={textAnswers[q.id] || ""}
+                  onChange={(e) => handleTextChange(q.id, e.target.value)}
+                  placeholder="Введите ваш ответ..."
+                  aria-label={`Вопрос ${q.id}: текстовый ответ`}
+                />
+              </TextAnswerWrapper>
+            )}
           </QuestionCard>
         ))}
       </QuestionsList>
     </div>
   );
 }
+
+
