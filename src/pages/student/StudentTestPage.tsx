@@ -93,9 +93,11 @@ export default function StudentTestPage() {
   if (loading) return <p>Загрузка…</p>;
   if (error) return <p style={{ color: "red" }}>Ошибка: {error}</p>;
 
+
   const filtered = questions.filter((q) => q.testId === testId);
   if (filtered.length === 0) return <p>Вопросы не найдены</p>;
 
+  
   const handleTextChange = (id: number | string, value: string) => {
     setTextAnswers((prev) => ({ ...prev, [id]: value }));
   };
@@ -156,5 +158,6 @@ export default function StudentTestPage() {
     </div>
   );
 }
+
 
 
